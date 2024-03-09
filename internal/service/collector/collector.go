@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"context"
 	"log/slog"
 	"maps"
 	"sync"
@@ -15,8 +16,7 @@ type MetricWriter interface {
 }
 
 type Collector interface {
-	MetricReader
-	MetricWriter
+	Start(ctx context.Context)
 }
 
 type collector struct {
@@ -50,4 +50,9 @@ func (c *collector) Write(key, value string) {
 	c.logger.Debug("writing in-memory data", "key", key, "value", value)
 
 	c.inMemory[key] = value
+}
+
+func (c *collector) Start(ctx context.Context) {
+	c.logger.Info("starting collectors")
+	defer c.logger.Info("stopping collectors")
 }

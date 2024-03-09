@@ -1,4 +1,4 @@
-package app
+package config
 
 import (
 	"log/slog"
@@ -15,7 +15,11 @@ type config struct {
 	PublishExporterMetrics *bool
 }
 
-func DefaultConfig() *config {
+func NewConfig() *config {
+	return defaultConfig()
+}
+
+func defaultConfig() *config {
 	return &config{
 		LogFilePath:            common.MakePtr(defaultLogFilePath),
 		LogLevel:               common.MakePtr(slog.LevelInfo.String()),
@@ -25,7 +29,7 @@ func DefaultConfig() *config {
 }
 
 func (c *config) ParseConfig() *config {
-	pc := DefaultConfig()
+	pc := defaultConfig()
 
 	if c.LogFilePath != nil && *c.LogFilePath != "" {
 		pc.LogFilePath = c.LogFilePath
@@ -33,6 +37,14 @@ func (c *config) ParseConfig() *config {
 
 	if c.LogLevel != nil && *c.LogFilePath != "" {
 		pc.LogLevel = c.LogLevel
+	}
+
+	if c.Port != nil && *c.Port != 0 {
+		pc.Port = c.Port
+	}
+
+	if c.PublishExporterMetrics != nil {
+		pc.PublishExporterMetrics = c.PublishExporterMetrics
 	}
 
 	return pc
