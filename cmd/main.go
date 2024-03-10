@@ -3,27 +3,23 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"log/slog"
-	"net"
-	"net/http"
-	"node-exporter-lite/internal/app"
-	"node-exporter-lite/internal/common"
-	"node-exporter-lite/internal/service/collector"
 	"os"
-	"time"
 
-	"github.com/google/uuid"
+	"node-exporter-lite/internal/config"
+	"node-exporter-lite/internal/metrics"
+	"node-exporter-lite/internal/server"
 )
 
 func main() {
-	config := app.DefaultConfig()
+	config := config.NewConfig()
 
 	// Parse the command line flags
 	config.LogFilePath = flag.String("log-path", *config.LogFilePath, "Log file path")
 	config.LogLevel = flag.String("level", *config.LogLevel, "Log level")
 	config.Port = flag.Int("port", *config.Port, "Port to listen on")
-	config.PublishExporterMetrics = flag.Bool("publish-exporter-metrics", *config.PublishExporterMetrics, "Publish exporter metrics")
+	config.PublishExporterMetrics = flag.Bool(
+		"publish-exporter-metrics", *config.PublishExporterMetrics, "Publish exporter metrics")
 
 	flag.Parse()
 	config = config.ParseConfig()
@@ -41,26 +37,9 @@ func main() {
 		"logLevel", *config.LogLevel,
 		"publishExporterMetrics", *config.PublishExporterMetrics)
 
-	collector := collector.NewCollector(logger)
-	app := app.NewApp(logger, collector)
-	routes := app.Routes()
+	metricRegistry := metrics.NewRegistry("node_exporter", *config.PublishExporterMetrics)
 
-	server := &http.Server{
-		Addr:              fmt.Sprintf(":%d", *config.Port),
-		Handler:           routes,
-		ReadHeaderTimeout: time.Second,
-		WriteTimeout:      time.Second,
-		IdleTimeout:       time.Second,
-		ConnContext: func(ctx context.Context, c net.Conn) context.Context {
-			requestID := uuid.NewString()
-			valueCtx := context.WithValue(ctx, common.RequestID{}, requestID)
-			remoteAddr := c.RemoteAddr().String()
-			valueCtx = context.WithValue(valueCtx, common.RemoteAddr{}, remoteAddr)
-
-			return valueCtx
-		},
-	}
-
+	server := server.NewServer(*config.Port, metricRegistry.Get())
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
