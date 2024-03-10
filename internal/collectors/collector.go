@@ -1,8 +1,9 @@
 package collectors
 
-import "node-exporter-lite/internal/metrics"
+import (
+	"context"
+)
 
 type Collector interface {
-	Collect(getter metrics.MetricReader)
-	RegisterMetrics(adder metrics.MetricAdder)
+	Collect(ctx context.Context)
 }
