@@ -7,9 +7,9 @@ env:
 flags:
   - -trimpath
 
-goos: linux
+goos: freebsd
 
-goarch: arm
+goarch: arm64
 
 main: ./cmd/node-exporter-lite/main.go
 

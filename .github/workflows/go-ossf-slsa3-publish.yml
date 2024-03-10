@@ -16,12 +16,11 @@ jobs:
       matrix:
         os:
           - linux
-          # - openbsd
-          # - freebsd
+          - openbsd
+          - freebsd
         arch:
           - amd64
           - arm64
-          # - arm
           - armv7
     uses: slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@v1.4.0
     with:
