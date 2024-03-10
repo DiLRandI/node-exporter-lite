@@ -63,7 +63,7 @@ func (c *ThermalCollector) readAllThermalZones() {
 			panic(err)
 		}
 
-		metricName := c.buildMetricName(entry.Name(), typeContent)
+		metricName := c.buildMetricName(typeContent)
 		c.thermalZones[metricName] = temperaturePath
 	}
 
@@ -87,8 +87,8 @@ func (c *ThermalCollector) readContent(path string) (string, error) {
 	return strings.TrimSpace(string(content)), nil
 }
 
-func (c *ThermalCollector) buildMetricName(name, typ string) string {
-	return name + "_" + strings.ReplaceAll(strings.ToLower(typ), " ", "_")
+func (c *ThermalCollector) buildMetricName(typ string) string {
+	return strings.ReplaceAll(strings.ToLower(typ), " ", "_")
 }
 
 func (c *ThermalCollector) Collect(ctx context.Context) {
@@ -97,10 +97,13 @@ func (c *ThermalCollector) Collect(ctx context.Context) {
 
 func (c *ThermalCollector) collect(ctx context.Context) {
 	c.logger.Info("thermal collector started")
+	c.collectThermalZones()
+
 	for {
 		select {
 		case <-ctx.Done():
 			c.logger.Info("thermal collector stopped")
+
 			return
 		case <-time.After(c.interval):
 			c.collectThermalZones()
