@@ -2,11 +2,14 @@ package config
 
 import (
 	"log/slog"
+
 	"node-exporter-lite/internal/common"
 )
 
-const defaultPort = 8080
-const defaultLogFilePath = "/var/log/node-exporter-lite.log"
+const (
+	defaultPort        = 8080
+	defaultLogFilePath = "/var/log/node-exporter-lite.log"
+)
 
 type config struct {
 	LogFilePath            *string

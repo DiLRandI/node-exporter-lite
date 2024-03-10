@@ -5,5 +5,7 @@ func MakePtr[T any](v T) *T {
 	return &v
 }
 
-type RequestID struct{}
-type RemoteAddr struct{}
+type (
+	RequestID  struct{}
+	RemoteAddr struct{}
+)
