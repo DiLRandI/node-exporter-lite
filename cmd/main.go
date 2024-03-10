@@ -38,7 +38,7 @@ func main() {
 		"logLevel", *config.LogLevel,
 		"publishExporterMetrics", *config.PublishExporterMetrics)
 
-	metricRegistry := metrics.NewRegistry("node_exporter", *config.PublishExporterMetrics)
+	metricRegistry := metrics.NewRegistry("node_exporter_lite", *config.PublishExporterMetrics)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
