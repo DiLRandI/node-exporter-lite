@@ -13,16 +13,15 @@ import (
 
 func main() {
 	config := config.NewConfig()
-
 	// Parse the command line flags
 	config.LogFilePath = flag.String("log-path", *config.LogFilePath, "Log file path")
 	config.LogLevel = flag.String("level", *config.LogLevel, "Log level")
 	config.Port = flag.Int("port", *config.Port, "Port to listen on")
 	config.PublishExporterMetrics = flag.Bool(
 		"publish-exporter-metrics", *config.PublishExporterMetrics, "Publish exporter metrics")
-
 	flag.Parse()
 	config = config.ParseConfig()
+
 	level := new(slog.Level)
 	if err := level.UnmarshalText([]byte(*config.LogLevel)); err != nil {
 		panic(err)
@@ -40,6 +39,7 @@ func main() {
 	metricRegistry := metrics.NewRegistry("node_exporter", *config.PublishExporterMetrics)
 
 	server := server.NewServer(*config.Port, metricRegistry.Get())
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
