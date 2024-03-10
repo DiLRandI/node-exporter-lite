@@ -4,14 +4,11 @@ import (
 	"context"
 	"flag"
 	"log/slog"
+	"os"
+
 	"node-exporter-lite/internal/config"
 	"node-exporter-lite/internal/metrics"
 	"node-exporter-lite/internal/server"
-	"node-exporter-lite/internal/service/collector"
-	"node-exporter-lite/internal/service/collectors/cpu"
-	"os"
-
-	"github.com/prometheus/client_golang/prometheus"
 )
 
 func main() {
@@ -40,32 +37,15 @@ func main() {
 		"logLevel", *config.LogLevel,
 		"publishExporterMetrics", *config.PublishExporterMetrics)
 
-	var register *prometheus.Registry
-	if *config.PublishExporterMetrics {
-		r, ok := prometheus.DefaultRegisterer.(*prometheus.Registry)
-		if !ok {
-			panic("failed to get default registerer")
-		}
+	metricRegistry := metrics.NewRegistry("node_exporter", *config.PublishExporterMetrics)
 
-		register = r
-	} else {
-		register = prometheus.NewRegistry()
-	}
-
-	metrics.Register(register)
-
-	collector := collector.NewCollector(logger)
-	collector.Start(context.Background())
-
-	server := server.NewServer(*config.Port, register)
+	server := server.NewServer(*config.Port, metricRegistry.Get())
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	server.RegisterOnShutdown(func() {
 		logger.WarnContext(ctx, "server is shutting down")
 	})
-
-	cpu.Collect(ctx)
 
 	logger.InfoContext(ctx, "server is starting", "port", *config.Port)
 	if err := server.ListenAndServe(); err != nil {
