@@ -23,6 +23,7 @@ func NewConfig() *config {
 
 func defaultConfig() *config {
 	return &config{
+		LogFilePath:            common.MakePtr(""),
 		LogLevel:               common.MakePtr(slog.LevelInfo.String()),
 		Port:                   common.MakePtr(defaultPort),
 		PublishExporterMetrics: common.MakePtr(false),
