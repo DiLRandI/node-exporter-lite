@@ -1,0 +1,21 @@
+version: 1
+
+env:
+  - GO111MODULE=on
+  - CGO_ENABLED=0
+  - GOARM=7
+
+flags:
+  - -trimpath
+
+goos: linux
+
+goarch: arm
+
+main: ./cmd/node-exporter-lite/main.go
+
+ldflags:
+  - "-s"
+  - "-w"
+
+binary: node-exporter-lite-{{ .Os }}-{{ .Arch }}
