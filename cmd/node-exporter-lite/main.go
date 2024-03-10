@@ -29,9 +29,19 @@ func main() {
 		panic(err)
 	}
 
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+	logOut := os.Stdout
+	if config.LogFilePath != nil && *config.LogFilePath != "" {
+		file, err := os.OpenFile(*config.LogFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+		logOut = file
+	}
+
+	logger := slog.New(slog.NewJSONHandler(logOut, &slog.HandlerOptions{
 		Level: *level,
 	}))
+
 	logger.Info("starting application",
 		"port", *config.Port,
 		"logFilePath", *config.LogFilePath,
