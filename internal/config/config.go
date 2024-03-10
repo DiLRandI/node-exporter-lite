@@ -7,8 +7,7 @@ import (
 )
 
 const (
-	defaultPort        = 8080
-	defaultLogFilePath = "/var/log/node-exporter-lite.log"
+	defaultPort = 8080
 )
 
 type config struct {
@@ -24,7 +23,6 @@ func NewConfig() *config {
 
 func defaultConfig() *config {
 	return &config{
-		LogFilePath:            common.MakePtr(defaultLogFilePath),
 		LogLevel:               common.MakePtr(slog.LevelInfo.String()),
 		Port:                   common.MakePtr(defaultPort),
 		PublishExporterMetrics: common.MakePtr(false),
