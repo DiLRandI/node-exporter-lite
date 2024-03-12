@@ -5,6 +5,14 @@
 
 A lightweight version of the [node-exporter](https://github.com/prometheus/node_exporter), specifically optimized for Raspberry Pi and Orange Pi devices. It aims to provide a simple and efficient method to monitor system resources on these low-power platforms. Unlike the original node-exporter, this lite version focuses on essential collectors, ensuring minimal resource usage while still offering valuable insights into system performance.
 
+## Install
+
+To install you can run the following command. Replace `vX.Y.Z` with the version you want to install.
+
+```bash
+curl -sSfL https://raw.githubusercontent.com/DiLRandI/node-exporter-lite/main/scripts/installer.sh | sh -s vX.Y.Z
+```
+
 ## Building
 
 To build application, go 1.22 is required.
