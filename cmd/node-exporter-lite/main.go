@@ -11,6 +11,7 @@ import (
 	"node-exporter-lite/internal/config"
 	"node-exporter-lite/internal/metrics"
 	"node-exporter-lite/internal/server"
+	"node-exporter-lite/signal"
 )
 
 func main() {
@@ -51,7 +52,6 @@ func main() {
 	metricRegistry := metrics.NewRegistry("node_exporter_lite", *config.PublishExporterMetrics)
 
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
 	thermal := thermal.New(logger, metricRegistry, metricRegistry, time.Second*5)
 	thermal.Collect(ctx)
@@ -62,10 +62,11 @@ func main() {
 		logger.WarnContext(ctx, "server is shutting down")
 	})
 
+	go signal.HandleSignals(logger, cancel)
+
 	logger.InfoContext(ctx, "server is starting", "port", *config.Port)
 	if err := server.ListenAndServe(); err != nil {
 		logger.ErrorContext(ctx, "server failed to start", "error", err)
 	}
 
-	logger.Warn("application is exiting")
 }

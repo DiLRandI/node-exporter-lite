@@ -2,6 +2,8 @@ package thermal
 
 import (
 	"context"
+	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"strconv"
@@ -21,6 +23,7 @@ type ThermalCollector struct {
 	metricAdder  metrics.MetricAdder
 	metricGetter metrics.MetricReader
 	thermalZones map[string]string
+	filePointers map[string]*os.File
 	logger       *slog.Logger
 	interval     time.Duration
 }
@@ -33,6 +36,7 @@ func New(
 ) collectors.Collector {
 	thermalCollector := &ThermalCollector{
 		thermalZones: make(map[string]string),
+		filePointers: make(map[string]*os.File),
 		logger:       logger,
 		interval:     interval,
 		metricAdder:  metricAdder,
@@ -78,10 +82,36 @@ func (c *ThermalCollector) registerMetric() {
 	}
 }
 
+func (c *ThermalCollector) hasFile(path string, forceReplace bool) (*os.File, error) {
+	if _, ok := c.filePointers[path]; ok && !forceReplace {
+		return c.filePointers[path], nil
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open file: %w", err)
+	}
+
+	c.logger.Info("opened file", "file", file.Name())
+	c.filePointers[path] = file
+
+	return file, nil
+}
+
 func (c *ThermalCollector) readContent(path string) (string, error) {
-	content, err := os.ReadFile(path)
+	f, err := c.hasFile(path, false)
 	if err != nil {
 		return "", err
+	}
+
+	_, err = f.Seek(0, 0)
+	if err != nil {
+		return "", fmt.Errorf("failed to seek file: %w", err)
+	}
+
+	content, err := io.ReadAll(f)
+	if err != nil {
+		return "", fmt.Errorf("failed to read file: %w", err)
 	}
 
 	return strings.TrimSpace(string(content)), nil
@@ -98,6 +128,11 @@ func (c *ThermalCollector) Collect(ctx context.Context) {
 func (c *ThermalCollector) collect(ctx context.Context) {
 	c.logger.Info("thermal collector started")
 	c.collectThermalZones()
+
+	defer func() {
+		c.cleanup()
+		c.logger.Info("thermal collector stopped")
+	}()
 
 	for {
 		select {
@@ -135,5 +170,17 @@ func (c *ThermalCollector) collectThermalZones() {
 		temp := float64(temperature) / 1000.0
 
 		metric.Set(temp)
+	}
+}
+
+func (c *ThermalCollector) cleanup() {
+	for _, file := range c.filePointers {
+		if file == nil {
+			continue
+		}
+
+		c.logger.Info("closing file", "file", file.Name())
+
+		file.Close()
 	}
 }
