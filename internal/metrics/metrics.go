@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"regexp"
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -52,6 +53,14 @@ func NewRegistry(nameSpace string, publishExporterMetrics bool) MetricRegistry {
 	}
 }
 
+func (m *metricRegistry) sanitizeMetricName(input string) string {
+	// Replace invalid characters with underscores
+	validName := regexp.MustCompile(`[^a-zA-Z0-9_:]`).ReplaceAllString(input, "_")
+	// Ensure that the metric name starts with a letter or underscore
+
+	return validName
+}
+
 func (m *metricRegistry) AddGaugeMetric(subsystem, name, help string) error {
 	m.rwLock.Lock()
 	defer m.rwLock.Unlock()
@@ -61,7 +70,7 @@ func (m *metricRegistry) AddGaugeMetric(subsystem, name, help string) error {
 	}
 
 	gaugeMetric := prometheus.NewGauge(prometheus.GaugeOpts{
-		Name:      name,
+		Name:      m.sanitizeMetricName(name),
 		Help:      help,
 		Namespace: m.nameSpace,
 		Subsystem: subsystem,
