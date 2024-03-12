@@ -87,6 +87,11 @@ func (c *ThermalCollector) hasFile(path string, forceReplace bool) (*os.File, er
 		return c.filePointers[path], nil
 	}
 
+	if _, ok := c.filePointers[path]; ok && forceReplace {
+		c.filePointers[path].Close()
+		delete(c.filePointers, path)
+	}
+
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file: %w", err)
