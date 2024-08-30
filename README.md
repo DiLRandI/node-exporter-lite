@@ -7,10 +7,10 @@ A lightweight version of the [node-exporter](https://github.com/prometheus/node_
 
 ## Install
 
-To install you can run the following command. Replace `vX.Y.Z` with the version you want to install.
+To install you can run the following command. Replace `${{env.RELEASE_VERSION}}` with the version you want to install.
 
 ```bash
-curl -sSfL https://raw.githubusercontent.com/DiLRandI/node-exporter-lite/main/scripts/installer.sh | sh -s vX.Y.Z
+curl -sSfL https://raw.githubusercontent.com/DiLRandI/node-exporter-lite/main/scripts/installer.sh | sh -s ${{env.RELEASE_VERSION}}
 ```
 
 ## Building
