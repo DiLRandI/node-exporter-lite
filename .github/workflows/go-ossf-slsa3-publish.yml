@@ -24,7 +24,7 @@ jobs:
           - armv7
     uses: slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@v1.4.0
     with:
-      go-version: 1.22
+      go-version: 1.23
       config-file: .github/release/release.${{matrix.os}}.${{matrix.arch}}.yml
       
 
