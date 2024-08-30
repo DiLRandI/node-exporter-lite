@@ -1,8 +1,9 @@
 name: Go releaser
 on:
-  workflow_dispatch:
-  release:
-    types: [created]
+  workflow_run:
+    workflows: [Dynamic Template]
+    types:
+      - completed
 
 permissions: read-all
 
